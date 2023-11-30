@@ -1,29 +1,28 @@
-import os
-import numpy as np
-import cv2 as cv
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
-def imagem_existe(imagem):
-  return os.path.exists(imagem)
+from sklearn.cluster import KMeans
 
-def tudo():
-  algoritmo = cv.CascadeClassifier('haarcascade_smile.xml')
-  count = 1
+clusters = 10
 
-  while count <= 1:
-    img_dir = f"img/{count}.png"
+image = mpl.image.imread("./img/1.png")
 
-    if imagem_existe(img_dir):
-      print(f"Encontrou a imagem {img_dir}")
-      imagem = cv.imread(img_dir)
-      sorrisos = algoritmo.detectMultiScale(imagem)
-      cv.imshow("Sorrisos", sorrisos)
-    else:
-      print(f"'{img_dir}' não existe!")
+plt.imshow(image)
 
-    count = count + 1
+image.shape
 
-def main():
-  tudo()
-  cv.waitKey()
+x = image.reshape(-1, 3)
 
-main()
+kmeans = KMeans(n_clusters=clusters, n_init=10)
+
+kmeans.fit(x)
+
+segmented_img = kmeans.cluster_centers_[kmeans.labels_]
+segmented_img = segmented_img.reshape(image.shape)
+
+plt.imshow(segmented_img / 255)
+
+import cv2
+
+cv2.imwrite(f"./img/out/1_ORIGINAL.png", cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+cv2.imwrite(f"./img/out/1_{clusters}.png", cv2.cvtColor(segmented_img.astype("uint8"), cv2.COLOR_BGR2RGB))
