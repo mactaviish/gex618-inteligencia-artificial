@@ -1,28 +1,48 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import shutil
+import os.path
+import cv2
 
 from sklearn.cluster import KMeans
 
-clusters = 10
+max_image = 6
+max_cluster = 2 ** 6
 
-image = mpl.image.imread("./img/1.png")
+def create_out_path():
+  path = './out'
+  if(os.path.isdir(path)):
+    shutil.rmtree(path)
 
-plt.imshow(image)
+  os.makedirs(path)
+  count = 1
+  while(count <= max_image):
+    os.makedirs(f'./out/{count}')
+    count = count + 1
 
-image.shape
+def clustering(image):
+  print(f'clustering image: {image_count}')
 
-x = image.reshape(-1, 3)
+  reshaped_array = image.reshape(-1, 3)
+  cv2.imwrite(f'./out/{image_count}/{image_count}_ORIGINAL.png', cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
-kmeans = KMeans(n_clusters=clusters, n_init=10)
+  cluster = 3
+  while(cluster <= max_cluster):
+    kmeans = KMeans(n_clusters=cluster, n_init=10).fit(reshaped_array)
+    segmented_img = kmeans.cluster_centers_[kmeans.labels_]
+    segmented_img = segmented_img.reshape(image.shape)
+    cv2.imwrite(f'./out/{image_count}/{image_count}_{cluster}.png', cv2.cvtColor(segmented_img.astype('uint8'), cv2.COLOR_BGR2RGB))
+    cluster = cluster * 2
 
-kmeans.fit(x)
+def main():
+  global image_count
+  create_out_path()
 
-segmented_img = kmeans.cluster_centers_[kmeans.labels_]
-segmented_img = segmented_img.reshape(image.shape)
+  image_count = 1
+  while(image_count <= max_image):
+    image_path = f'./img/{image_count}.jpg'
+    if(os.path.isfile(image_path)):
+      clustering(mpl.image.imread(image_path))
+    image_count = image_count + 1
 
-plt.imshow(segmented_img / 255)
-
-import cv2
-
-cv2.imwrite(f"./img/out/1_ORIGINAL.png", cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-cv2.imwrite(f"./img/out/1_{clusters}.png", cv2.cvtColor(segmented_img.astype("uint8"), cv2.COLOR_BGR2RGB))
+main()
