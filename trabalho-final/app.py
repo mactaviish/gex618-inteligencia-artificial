@@ -26,7 +26,7 @@ def clustering(image):
   reshaped_array = image.reshape(-1, 3)
   cv2.imwrite(f'./out/{image_count}/{image_count}_ORIGINAL.png', cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
-  cluster = 3
+  cluster = 2
   while(cluster <= max_cluster):
     kmeans = KMeans(n_clusters=cluster, n_init=10).fit(reshaped_array)
     segmented_img = kmeans.cluster_centers_[kmeans.labels_]
